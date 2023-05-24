@@ -402,7 +402,10 @@ async def _(event:GroupMessageEvent,bot:Bot):
     if member_info['role'] == 'member':
         response = await fuck_ep.fuckk()
         if response == '寄':
-            await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+            try:
+                await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+            except Exception:
+                await get_fuck.finish("权限不足，无法禁言")
             img_filepath = os.path.abspath(path=f'./data/fuck/img/{random.randint(2,4)}.jpg').replace('\\','\\\\')
             await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=qid)+MessageSegment.image(file=f'file:///{img_filepath}',cache=False)))
         elif response == 0:
@@ -413,7 +416,10 @@ async def _(event:GroupMessageEvent,bot:Bot):
     elif member_info['role'] == 'admin':
         response = await fuck_ep.fuckk()
         if response == '寄':
-            await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+            try:
+                await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+            except Exception:
+                await get_fuck.finish("权限不足，无法禁言")
             img_filepath = os.path.abspath(path=f'./data/fuck/img/{random.randint(2,4)}.jpg').replace('\\','\\\\')
             await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=qid)+MessageSegment.image(file=f'file:///{img_filepath}',cache=False)))
         elif response == 0:
@@ -424,7 +430,10 @@ async def _(event:GroupMessageEvent,bot:Bot):
     elif member_info['role'] == 'owner':
         response = await fuck_ep.fuckk()
         if response == '寄':
-            await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+            try:
+                await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+            except Exception:
+                await get_fuck.finish("权限不足，无法禁言")
             img_filepath = os.path.abspath(path=f'./data/fuck/img/{random.randint(2,4)}.jpg').replace('\\','\\\\')
             await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=qid)+MessageSegment.image(file=f'file:///{img_filepath}',cache=False)))
         elif response == 0:
@@ -438,7 +447,10 @@ async def fuck_to_other(event:GroupMessageEvent,bot:Bot):
     gid = event.group_id
     if event.to_me:
         img_filepath = os.path.abspath(path='./data/fuck/img/100.jpg').replace('\\','\\\\')
-        await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+        try:
+                await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+        except Exception:
+            await fuck_other.finish("权限不足，无法禁言")
         await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=qid)+MessageSegment.image(file=f'file:///{img_filepath}',cache=False)))
         return 0
     to_qid = await get_at(event)
@@ -455,11 +467,17 @@ async def fuck_to_other(event:GroupMessageEvent,bot:Bot):
                 await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=qid)+'测码失败，你没码'))
             elif response == 1:
                 #测到了
-                await bot.set_group_ban(group_id=gid,user_id=to_qid,duration=random.randint(5*60,15*60))
+                try:
+                    await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+                except Exception:
+                    await fuck_other.finish("权限不足，无法禁言")
                 await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=to_qid)+'你被'+MessageSegment.at(user_id=qid)+'测了'))
             elif response == 2:
                 #被反制了
-                await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+                try:
+                    await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+                except Exception:
+                    await fuck_other.finish("权限不足，无法禁言")
                 await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=qid)+'对方反制了你的码'))
             elif response == 3:
                 #没测到
@@ -472,11 +490,17 @@ async def fuck_to_other(event:GroupMessageEvent,bot:Bot):
                 await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=qid)+'测码失败，你没码'))
             elif response['stat'] == 1:
                 #测到了
-                await bot.set_group_ban(group_id=gid,user_id=to_qid,duration=random.randint(5*60,15*60))
+                try:
+                    await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+                except Exception:
+                    await fuck_other.finish("权限不足，无法禁言")
                 await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=to_qid)+'你被'+MessageSegment.at(user_id=qid)+'测了'))
             elif response['stat'] == 2:
                 #被反制了
-                await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+                try:
+                    await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+                except Exception:
+                    await fuck_other.finish("权限不足，无法禁言")
                 await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=qid)+'对方反制了你的码'))
             elif response['stat'] == 3:
                 #没测到
@@ -488,5 +512,8 @@ async def fuck_to_other(event:GroupMessageEvent,bot:Bot):
                 elif response['steal_card'] == 'COUNTER_CARD':
                     card = '反制码'
                 quantity = response['quantity']
-                await bot.set_group_ban(group_id=gid,user_id=to_qid,duration=random.randint(5*60,15*60))
+                try:
+                    await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+                except Exception:
+                    await fuck_other.finish("权限不足，无法禁言")
                 await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=to_qid)+'你不仅被'+MessageSegment.at(user_id=qid)+f'测了，还被偷走了{quantity}张{card}'))
