@@ -468,7 +468,7 @@ async def fuck_to_other(event:GroupMessageEvent,bot:Bot):
             elif response == 1:
                 #测到了
                 try:
-                    await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+                    await bot.set_group_ban(group_id=gid,user_id=to_qid,duration=random.randint(5*60,15*60))
                 except Exception:
                     await fuck_other.finish("权限不足，无法禁言")
                 await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=to_qid)+'你被'+MessageSegment.at(user_id=qid)+'测了'))
@@ -491,7 +491,7 @@ async def fuck_to_other(event:GroupMessageEvent,bot:Bot):
             elif response['stat'] == 1:
                 #测到了
                 try:
-                    await bot.set_group_ban(group_id=gid,user_id=qid,duration=random.randint(5*60,15*60))
+                    await bot.set_group_ban(group_id=gid,user_id=to_qid,duration=random.randint(5*60,15*60))
                 except Exception:
                     await fuck_other.finish("权限不足，无法禁言")
                 await bot.send_group_msg(group_id=gid,message=(MessageSegment.at(user_id=to_qid)+'你被'+MessageSegment.at(user_id=qid)+'测了'))
