@@ -179,14 +179,31 @@ async def get_at(event: GroupMessageEvent) -> list:
                 at_list.append(int(msg_seg.data["qq"]))
     return at_list
 
-is_admin = SUPERUSER | permission.GROUP_OWNER
+is_admin = SUPERUSER | permission.GROUP_OWNER | permission.GROUP_ADMIN
 
-init = on_command("初始化",block=True,permission=is_admin)
-delete_func = on_command("关闭防改名",block=True,permission=is_admin)
-increase_bmd = on_command("白名单",block=True,permission=is_admin)
-decrease_bmd = on_command("取消白名单",block=True,permission=is_admin)
+# 这里是指令
+init_tip = "初始化"
+delete_func_tip = "关闭防改名"
+increase_bmd_tip = "白名单"
+decrease_bmd_tip = "取消白名单"
+
+init = on_command(init_tip,block=True,permission=is_admin)
+delete_func = on_command(delete_func_tip,block=True,permission=is_admin)
+increase_bmd = on_command(increase_bmd_tip,block=True,permission=is_admin)
+decrease_bmd = on_command(decrease_bmd_tip,block=True,permission=is_admin)
 look_stat = on_command("stat",block=True,permission=SUPERUSER)
+help = on_command('help',block=False,permission=is_admin)
 notice = on_notice()
+
+# 显示帮助文本
+@help.handle()
+async def hhelpp(bot:Bot,event:GroupMessageEvent):
+    msg = f"""指令列表：
+    {init_tip}
+    {delete_func_tip}
+    {increase_bmd_tip}
+    {decrease_bmd_tip}"""
+    await help.finish(msg)
 
 # 功能初始化
 @init.handle()
