@@ -1,11 +1,15 @@
 import os,sqlite3,nonebot,asyncio
-from nonebot import logger,get_bot,require,on_notice,on_command
+from nonebot import logger,get_bot,get_driver,require,on_notice,on_command
 from nonebot.adapters.onebot.v11 import Bot,GroupMessageEvent,GroupIncreaseNoticeEvent,GroupDecreaseNoticeEvent,permission,MessageSegment,Event
 from nonebot.permission import SUPERUSER
 require('nonebot_plugin_apscheduler')
 from nonebot_plugin_apscheduler import scheduler
+from nonebot.log import default_format, default_filter
 
+logger.add("error.log", level="ERROR", format=default_format, rotation="1 week")
 
+# 获取机器人超级管理员
+superusers = get_driver().config.superusers
 
 
 if os.path.exists('./data/group_nickname/db'):
@@ -348,7 +352,7 @@ async def save_new(bot:Bot,event:GroupIncreaseNoticeEvent):
         return
     global waiting
     waiting = True
-    await asyncio.sleep(5)
+    await asyncio.sleep(10)
     info = await bot.get_group_member_info(group_id=event.group_id,user_id=event.user_id,no_cache=True)
     await ex.insert_database(qid=event.user_id,card=info['card'],role=info['role'],is_bmd=False)
     waiting = False
@@ -384,6 +388,7 @@ async def check():
             group_enable_data[f"{i[1]}"] = [int(i[0])]
     for self_id,gid_list in group_enable_data.items():
         bot_id = int(self_id)
+        # 获取对应数据库的机器人id
         try:
             bot = nonebot.get_bot(self_id=f'{bot_id}')
         except:
@@ -395,28 +400,42 @@ async def check():
             # 获取群成员列表
             for member_info in group_member_list:
                 qid = member_info['user_id']
+                # 从获取信息
                 re = await ex.select_data(qid=qid)
                 if re == 0:
+                    # 跳过自己
                     if qid == int(bot.self_id):
                         continue
+                    # 看有没有没有添加到数据库的人
                     try:
+                        # 刚加群的
                         if waiting:
                             continue
+                        # 不是刚加群的
                         else:
                             await ex.insert_database(qid=qid,card=member_info['card'],role=member_info['role'],is_bmd=False)
                             logger.info(f'发现漏网之鱼{qid}')
                             continue
+                    # waiting变量不存在
                     except NameError:
                         await ex.insert_database(qid=qid,card=member_info['card'],role=member_info['role'],is_bmd=False)
                         logger.info(f'发现漏网之鱼{qid}')
                         continue
+                # 是白名单，跳过
                 if re['BMD'] == 'True':
                     continue
+                # 群名片和数据库的不匹配
                 if re['CARD'] != member_info['card']:
+                    logger.error(f"用户数据库群名片{re['CARD']},用户群名片{member_info['card']}，qq：{qid}")
                     re['CHANGE_TIMES'] += 1
                     await ex.update_database(qid=qid,key='更改群名片次数',value=f'{re["CHANGE_TIMES"]}')
                     await bot.set_group_card(group_id=group_id,user_id=qid,card=f'{re["CARD"]}')
-                    await bot.send_group_msg(group_id=group_id, message=MessageSegment.at(user_id=qid)+'禁止修改群名片，机器人已自动改回原来的群名片')
+                    # 防止bug
+                    if member_info['card'] == '':
+                        pass
+                    else:
+                        await bot.send_group_msg(group_id=group_id, message=MessageSegment.at(user_id=qid)+'禁止修改群名片，机器人已自动改回原来的群名片')
+                # 成员身份检查
                 if re['ROLE'] != member_info['role']:
                     await ex.update_database(qid=qid,key='身份',value=f'{member_info["role"]}')
     logger.info('稽查完成')
