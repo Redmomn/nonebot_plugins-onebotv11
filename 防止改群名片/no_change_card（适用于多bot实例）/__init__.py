@@ -1,4 +1,4 @@
-import os,sqlite3,nonebot,asyncio
+import os,sqlite3,nonebot,asyncio,time
 from nonebot import logger,get_bot,get_driver,require,on_notice,on_command
 from nonebot.adapters.onebot.v11 import Bot,GroupMessageEvent,GroupIncreaseNoticeEvent,GroupDecreaseNoticeEvent,permission,MessageSegment,Event
 from nonebot.permission import SUPERUSER
@@ -341,7 +341,8 @@ async def stat(bot:Bot,event:Event):
         """
     await look_stat.finish(msg)
 
-# 加群之后保存群名片
+# 这段代码功能放在定时任务
+""" # 加群之后保存群名片
 @notice.handle()
 async def save_new(bot:Bot,event:GroupIncreaseNoticeEvent):
     ex = no(event.group_id,self_id=bot.self_id)
@@ -356,7 +357,7 @@ async def save_new(bot:Bot,event:GroupIncreaseNoticeEvent):
     info = await bot.get_group_member_info(group_id=event.group_id,user_id=event.user_id,no_cache=True)
     await ex.insert_database(qid=event.user_id,card=info['card'],role=info['role'],is_bmd=False)
     waiting = False
-
+ """
 # 退群之后删除这条数据
 @notice.handle()
 async def delete_old(bot:Bot,event:GroupDecreaseNoticeEvent):
@@ -395,7 +396,11 @@ async def check():
             logger.info("未找到当然机器人实例，跳过")
             continue
         for group_id in gid_list:
-            group_member_list = await bot.get_group_member_list(group_id=group_id,no_cache=True)
+            try:
+                group_member_list = await bot.get_group_member_list(group_id=group_id,no_cache=True)
+            except:
+                logger.info("群聊不存在，跳过")
+                continue
             ex = no(group_id=group_id,self_id=bot_id)
             # 获取群成员列表
             for member_info in group_member_list:
@@ -407,20 +412,21 @@ async def check():
                     if qid == int(bot.self_id):
                         continue
                     # 看有没有没有添加到数据库的人
-                    try:
-                        # 刚加群的
-                        if waiting:
+                    else:
+                        # 查qq信息，如果加群时间小于30秒则跳过
+                        try:
+                            temp_qqinfo = await bot.get_group_member_info(group_id = group_id, user_id = qid, no_cache = True)
+                            # 加群时间小于30秒
+                            if int(time.time()) - temp_qqinfo["join_time"] <= 30:
+                                continue
+                            # 不小于30秒
+                            else:
+                                await ex.insert_database(qid=qid,card=member_info['card'],role=member_info['role'],is_bmd=False)	
+                                logger.info(f'发现漏网之鱼{qid}')
+                                continue
+                        except Exception:
+                            logger.info("不存在的群成员")
                             continue
-                        # 不是刚加群的
-                        else:
-                            await ex.insert_database(qid=qid,card=member_info['card'],role=member_info['role'],is_bmd=False)
-                            logger.info(f'发现漏网之鱼{qid}')
-                            continue
-                    # waiting变量不存在
-                    except NameError:
-                        await ex.insert_database(qid=qid,card=member_info['card'],role=member_info['role'],is_bmd=False)
-                        logger.info(f'发现漏网之鱼{qid}')
-                        continue
                 # 是白名单，跳过
                 if re['BMD'] == 'True':
                     continue
