@@ -1,6 +1,6 @@
 from nonebot.rule import ArgumentParser
 from nonebot import on_shell_command,on_fullmatch,on_command
-import nonebot
+import nonebot,re
 from argparse import Namespace
 from nonebot.adapters.onebot.v11 import Bot,GroupMessageEvent,PrivateMessageEvent,Event
 from nonebot.typing import T_State
@@ -47,8 +47,10 @@ async def send_msg(bot:Bot,event:Event,state:T_State):
             bot = nonebot.get_bot(bot_id)
         else:
             await sendmsg.finish("此bot不存在")
+    replacement = "[CQ:at,qq=\g<1>]"
+    msg = re.sub(r"&#91;@(\d+)&#93;",replacement,args.msg)
     try:
-        await bot.send_group_msg(group_id=gid,message=args.msg)
+        await bot.send_group_msg(group_id=gid,message=msg)
     except:
         await sendmsg.finish("发送失败：群聊不存在")
 
